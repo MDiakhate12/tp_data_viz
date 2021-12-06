@@ -22,4 +22,11 @@
     border-radius: 10px;
     transition: all 0.2s ease-in-out;
     position: absolute;
+    font-family: monospace;
+}
+
+.tooltip-text {
+    color: gray;
+    font-size: 25px;
+    text-align: center;
 }

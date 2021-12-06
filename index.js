@@ -98,8 +98,11 @@ d3.csv("covid-06-11-2021.csv").then(data => {
                 console.log(x, y)
                 console.log(d)
                 const style = `left: ${x + 15}px; top: ${y - 35}px`
-                
-                tooltip.classed('hidden', false).html(d.properties.nom).attr('style', style)
+                const html = `
+                    <div class="tooltip-title">${d.properties.nom}</div>
+                    <div class="tooltip-text">${d.properties.value}</div>
+                `
+                tooltip.classed('hidden', false).html(html).attr('style', style)
             })
             .on('mouseout', (e, d) => {
                 tooltip.classed('hidden', true)
