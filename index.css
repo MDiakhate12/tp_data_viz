@@ -1,0 +1,25 @@
+.departement {
+    fill: #000;
+    stroke: #fff;
+    stroke-width: 0.2px;
+}
+
+.departement:hover {
+    fill: rgba(255, 166, 0, 0.541)!important;
+}
+
+.hidden {
+    display: none;
+}
+
+.tooltip {
+    padding: 20px;
+    background-color: rgba(252, 252, 252, 0.774);
+    box-shadow: 1px 1px 10px 0px gray;
+    color: rgb(47, 128, 0);
+    font-weight: bold;
+    box-sizing: content-box;
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+    position: absolute;
+}
