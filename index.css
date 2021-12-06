@@ -30,3 +30,71 @@
     font-size: 25px;
     text-align: center;
 }
+
+.slider-title {
+    font-family: monospace;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 300px;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    margin-bottom: 20px;
+  }
+  
+  .slider:hover {
+    opacity: 1;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #04AA6D;
+    cursor: pointer;
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #04AA6D;
+    cursor: pointer;
+  }
+
+  .info {
+    width: 295px;
+    padding-left: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background: #04AA6D;;
+    margin-bottom: 1px;
+    font-weight: bold;
+    font-family: monospace;
+    box-shadow: 0px 0px 10px 0px gray;
+  }
+
+  .student {
+    float: right;
+    width: 350;
+    padding: 25px;
+    background: #04AA6D;;
+    margin-bottom: 1px;
+    font-weight: bold;
+    font-family: monospace;
+    box-shadow: 0px 0px 10px 0px gray;
+  }
+
+
+
+
+
+
+
+
+  

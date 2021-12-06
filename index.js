@@ -1,3 +1,13 @@
+const dayOfYear = dateString => {
+    const date = new Date(Date.parse(dateString));
+    return Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+}
+
+const weekNumber = day => Math.floor(day / 7)
+
+const INITIAL_DATE = "2021-06-01"
+
+const firstDate = dayOfYear(INITIAL_DATE)
 
 var width = 700,
     height = 580;
@@ -15,6 +25,7 @@ var tooltip = d3
 
 // On rajoute un groupe englobant toute la visualisation pour plus tard
 var g = svg.append("g");
+
 
 // Autres projections : geoMercator, geoNaturalEarth1, ...
 // https://github.com/d3/d3-geo/blob/master/README.md
@@ -50,6 +61,7 @@ d3.csv("covid-06-11-2021.csv").then(data => {
 
         // console.log(json)
 
+
         //On parcours les departements du GeoJSON un par un
         for (var j = 0; j < json.features.length; j++) {
             var departement = json.features[j].properties
@@ -57,59 +69,104 @@ d3.csv("covid-06-11-2021.csv").then(data => {
             // find permet d'eviter de faire une boucle sur toutes les donnees 
             // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find#find_an_object_in_an_array_by_one_of_its_properties
 
-            var jourDepChoisi = cleanData.find(row =>
-                row.dep == departement.code && // récupèrer le departement
-                row.jour == jourChoisi // récupère le jour
-            )
+            // var jourDepChoisi = cleanData.find(row =>
+            //     row.dep == departement.code && // récupèrer le departement
+            //     row.jour == jourChoisi // récupère le jour
+            // )
 
-
-            // if (departement) {
-            json.features[j].properties.value = jourDepChoisi.hosp;
-            // }
+            // json.features[j].properties.value = jourDepChoisi.hosp;
             // console.log(json.features[j].properties)
+
+            const hospitalisations = cleanData
+                .filter(row => row.dep == departement.code)
+                .map(row => row.hosp)
+
+            json.features[j].properties.value = hospitalisations;
+
+            // console.log(hospitalisations)
+        }
+        console.log(json.features)
+
+        // g.selectAll("path")
+        //     .data(json.features)
+        //     .join("path")
+        //     .attr("d", path)
+        //     .attr("class", "departement")
+        //     .style("fill", function (d) {
+        //         //on prend la valeur recupere plus haut
+        //         var value = d.properties.value;
+
+        //         if (value) {
+        //             return color(value);
+        //         } else {
+        //             // si pas de valeur alors en gris
+        //             return "#ccc";
+        //         }
+        //     });
+
+
+        d3.select("#slider").on("input", function () {
+            const date = new Date(jourChoisi)
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+
+            // d3.select("#full-day").html(date.toLocaleDateString('fr-FR', options))
+            drawMap(+this.value);
+        });
+
+        const dayIndex = dayOfYear(jourChoisi) - firstDate
+
+        drawMap(dayIndex)
+
+        function drawMap(currentDay) {
+
+            carte = svg.selectAll("path")
+                .data(json.features)
+
+            carte.join("path")
+                .attr("d", path)
+                .attr("class", "departement")
+                .style("fill", function (d) {
+                    //on prend la valeur recupere plus haut
+                    var value = d.properties.value[currentDay];
+
+                    if (value) {
+                        return color(value);
+                    } else {
+                        // si pas de valeur alors en gris
+                        return "#ccc";
+                    }
+                });
+
+            d3.select("#week-day").html(`Semaine n°${1 + weekNumber(currentDay)}`)
+            d3.select("#day").html(`Jour n°${1 + currentDay}`)
+
+            svg.selectAll('.departement')
+                .data(json.features)
+                .join('path')
+                .attr('class', 'departement') // on ajoute la classe css 'province' a l'element svg path
+                .attr('d', path) // on cree la forme de l'etat
+                // .append("title")
+                // .text((item) => item.properties.nom)
+                .on('mousemove', (e, d) => {
+
+                    const [x, y] = [e.clientX, e.clientY]
+                    const style = `left: ${x + 15}px; top: ${y - 35}px`
+                    const html = `
+                    <div class="tooltip-title">${d.properties.nom}</div>
+                    <div class="tooltip-text">${d.properties.value[currentDay]}</div>
+                `
+                    tooltip.classed('hidden', false).html(html).attr('style', style)
+                })
+                .on('mouseout', (e, d) => {
+                    tooltip.classed('hidden', true)
+                })
+
         }
 
-        g.selectAll("path")
-            .data(json.features)
-            .join("path")
-            .attr("d", path)
-            .attr("class", "departement")
-            .style("fill", function (d) {
-                //on prend la valeur recupere plus haut
-                var value = d.properties.value;
-
-                if (value) {
-                    return color(value);
-                } else {
-                    // si pas de valeur alors en gris
-                    return "#ccc";
-                }
-            });
-
-        svg.selectAll('.departement')
-            .data(json.features)
-            .join('path')
-            .attr('class', 'departement') // on ajoute la classe css 'province' a l'element svg path
-            .attr('d', path) // on cree la forme de l'etat
-            // .append("title")
-            // .text((item) => item.properties.nom)
-            .on('mousemove', (e, d) => {
-                const [x, y] = [e.clientX, e.clientY]
-                console.log(x, y)
-                console.log(d)
-                const style = `left: ${x + 15}px; top: ${y - 35}px`
-                const html = `
-                    <div class="tooltip-title">${d.properties.nom}</div>
-                    <div class="tooltip-text">${d.properties.value}</div>
-                `
-                tooltip.classed('hidden', false).html(html).attr('style', style)
-            })
-            .on('mouseout', (e, d) => {
-                tooltip.classed('hidden', true)
-            })
     })
 
 
 
-
 })
+
+
