@@ -6,8 +6,10 @@ const dayOfYear = dateString => {
 const weekNumber = day => Math.floor(day / 7)
 
 const INITIAL_DATE = "2021-06-01"
+const LAST_DATE = "2021-11-25"
 
 const firstDate = dayOfYear(INITIAL_DATE)
+const lastDate = dayOfYear(LAST_DATE)
 
 var width = 700,
     height = 580;
@@ -61,7 +63,6 @@ d3.csv("covid-06-11-2021.csv").then(data => {
 
         // console.log(json)
 
-
         //On parcours les departements du GeoJSON un par un
         for (var j = 0; j < json.features.length; j++) {
             var departement = json.features[j].properties
@@ -85,7 +86,8 @@ d3.csv("covid-06-11-2021.csv").then(data => {
 
             // console.log(hospitalisations)
         }
-        console.log(json.features)
+
+        // console.log(json.features)
 
         // g.selectAll("path")
         //     .data(json.features)
@@ -106,11 +108,9 @@ d3.csv("covid-06-11-2021.csv").then(data => {
 
 
         d3.select("#slider").on("input", function () {
-            const date = new Date(jourChoisi)
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
             // d3.select("#full-day").html(date.toLocaleDateString('fr-FR', options))
-            drawMap(+this.value);
+            drawMap(parseInt(this.value));
         });
 
         const dayIndex = dayOfYear(jourChoisi) - firstDate
@@ -150,7 +150,9 @@ d3.csv("covid-06-11-2021.csv").then(data => {
                 .on('mousemove', (e, d) => {
 
                     const [x, y] = [e.clientX, e.clientY]
+
                     const style = `left: ${x + 15}px; top: ${y - 35}px`
+
                     const html = `
                     <div class="tooltip-title">${d.properties.nom}</div>
                     <div class="tooltip-text">${d.properties.value[currentDay]}</div>
@@ -161,12 +163,40 @@ d3.csv("covid-06-11-2021.csv").then(data => {
                     tooltip.classed('hidden', true)
                 })
 
+            // Afficher les données pour une journée
+            var hosp = cleanData
+                .filter(row => dayOfYear(row.jour) - firstDate == currentDay)
+                .map(row => parseInt(row.hosp))
+                .reduce((a, b) => a + b)
+
+            d3.select("#hosp-number").html(hosp)
+
+
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            console.log("currentDay", currentDay)
+            const currentDate = dayNumberToDate(currentDay + firstDate)
+            d3.select("#hosp-date").html(currentDate.toLocaleDateString('fr-FR', options))
         }
 
     })
 
-
-
 })
 
 
+const dayNumberToDate = dayNumber => {
+    const numberOfDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,]
+
+    var cumul = 0
+    var month, day;
+    
+    for (i = 0; i < numberOfDays.length; i++) {
+        if (dayNumber >= cumul && dayNumber <= cumul + numberOfDays[i]) {
+            month = i
+            day = dayNumber - cumul
+            break
+        }
+        cumul += numberOfDays[i]
+    }
+
+    return new Date(2021, month, day)
+}
